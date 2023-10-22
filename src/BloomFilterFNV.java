@@ -1,10 +1,10 @@
 import java.util.BitSet;
 
 public class BloomFilterFNV {
-    private BitSet bitSet;
-    private int filterSize;
-    private int dataSize;
-    private int numHashes;
+    private final BitSet bitSet; // bit array
+    private final int filterSize; // size of bloom filter (M)
+    private int dataSize; // number of items added to the set (n)
+    private final int numHashes; // number of hash functions (k)
 
     public BloomFilterFNV(int setSize, int bitsPerElement) {
         this.filterSize = setSize * bitsPerElement;

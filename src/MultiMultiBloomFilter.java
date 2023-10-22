@@ -2,23 +2,26 @@ import java.util.BitSet;
 import java.util.Random;
 
 public class MultiMultiBloomFilter {
-    private BitSet[] bitSets;
-    private int numArrays;
-    private int arraySize;
-    private int dataSize;
-    private int[] aValues;
-    private int[] bValues;
-    private int prime;
+    private final BitSet[] bitSets; // array of bitsets
 
-    public MultiMultiBloomFilter(int setSize, int numArrays) {
-        this.numArrays = numArrays;
-        this.arraySize = setSize;
+    private final int filterSize; // size of bloom filter (M)
+    private final int numArrays; // number of arrays (k)
+    private final int setSize; // size of set (N)
+    private int dataSize; // number of items added to the set (n)
+    private final int[] aValues;
+    private final int[] bValues;
+    private final int prime;
+
+    public MultiMultiBloomFilter(int setSize, int bitsPerElement) {
+        this.filterSize = setSize * bitsPerElement;
+        this.numArrays = (int) Math.round(Math.log(2) * filterSize / setSize);;
+        this.setSize = setSize;
         this.bitSets = new BitSet[numArrays];
         for (int i = 0; i < numArrays; i++) {
-            bitSets[i] = new BitSet(arraySize);
+            bitSets[i] = new BitSet(this.setSize);
         }
         this.dataSize = 0;
-        this.prime = findNextPrime(arraySize+1);
+        this.prime = findNextPrime(this.setSize +1);
 
         // Generate hash function params
         Random rand = new Random();
@@ -34,7 +37,7 @@ public class MultiMultiBloomFilter {
         s = s.toLowerCase();
         for (int i = 0; i < numArrays; i++) {
             int hash = randomHash(s, i);
-            bitSets[i].set(Math.abs(hash % arraySize));
+            bitSets[i].set(Math.abs(hash % setSize));
         }
         dataSize++;
     }
@@ -43,7 +46,7 @@ public class MultiMultiBloomFilter {
         s = s.toLowerCase();
         for (int i = 0; i < numArrays; i++) {
             int hash = randomHash(s, i);
-            if (!bitSets[i].get(Math.abs(hash % arraySize))) {
+            if (!bitSets[i].get(Math.abs(hash % setSize))) {
                 return false;
             }
         }
@@ -81,5 +84,13 @@ public class MultiMultiBloomFilter {
             }
         }
         return true;
+    }
+
+    public int getFilterSize() {
+        return filterSize;
+    }
+
+    public int getDataSize() {
+        return dataSize;
     }
 }
