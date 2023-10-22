@@ -8,8 +8,8 @@ import java.io.IOException;
 public class FalsePositives {
     private static final int setSize = 10000; // size of data set (N)
 
-    private static final bitsPerElement = 8; // number of bits per element (b)
-    private static final int filterSize = ; // size of bloom filter (M)
+    private static final int bitsPerElement = 8; // number of bits per element (b)
+    private static final int filterSize = setSize * bitsPerElement; // size of bloom filter (M)
 
 
     public static void main(String[] args) throws IOException {
