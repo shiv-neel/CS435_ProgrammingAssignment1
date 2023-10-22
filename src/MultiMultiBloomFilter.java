@@ -1,25 +1,30 @@
 import java.util.BitSet;
 import java.util.Random;
 
-public class BloomFilterRan {
-    private BitSet bitSet;
-    private int filterSize;
+public class MultiMultiBloomFilter {
+    private BitSet[] bitSets;
+    private int numArrays;
+    private int arraySize;
     private int dataSize;
-    private int numHashes;
-    private int prime;
     private int[] aValues;
     private int[] bValues;
+    private int prime;
 
-    public BloomFilterRan(int setSize, int bitsPerElement) {
-        this.filterSize = setSize * bitsPerElement;
-        this.bitSet = new BitSet(filterSize);
-        this.numHashes = (int) Math.round(Math.log(2) * filterSize / setSize);
+    public MultiMultiBloomFilter(int setSize, int numArrays) {
+        this.numArrays = numArrays;
+        this.arraySize = setSize;
+        this.bitSets = new BitSet[numArrays];
+        for (int i = 0; i < numArrays; i++) {
+            bitSets[i] = new BitSet(arraySize);
+        }
         this.dataSize = 0;
-        this.prime = findNextPrime(filterSize+1);
-        this.aValues = new int[numHashes];
-        this.bValues = new int[numHashes];
+        this.prime = findNextPrime(arraySize+1);
+
+        // Generate hash function params
         Random rand = new Random();
-        for (int i = 0; i < numHashes; i++) {
+        this.aValues = new int[numArrays];
+        this.bValues = new int[numArrays];
+        for (int i = 0; i < numArrays; i++) {
             aValues[i] = rand.nextInt(prime);
             bValues[i] = rand.nextInt(prime);
         }
@@ -27,39 +32,22 @@ public class BloomFilterRan {
 
     public void add(String s) {
         s = s.toLowerCase();
-        for (int i = 0; i < numHashes; i++) {
+        for (int i = 0; i < numArrays; i++) {
             int hash = randomHash(s, i);
-            bitSet.set(Math.abs(hash % filterSize));
+            bitSets[i].set(Math.abs(hash % arraySize));
         }
         dataSize++;
     }
 
     public boolean appears(String s) {
         s = s.toLowerCase();
-        for (int i = 0; i < numHashes; i++) {
+        for (int i = 0; i < numArrays; i++) {
             int hash = randomHash(s, i);
-            if (!bitSet.get(Math.abs(hash % filterSize))) {
-                // if one of the locations is false, then the element is not in the set
+            if (!bitSets[i].get(Math.abs(hash % arraySize))) {
                 return false;
             }
         }
         return true;
-    }
-
-    public int filterSize() {
-        return filterSize;
-    }
-
-    public int dataSize() {
-        return dataSize;
-    }
-
-    public int numHashes() {
-        return numHashes;
-    }
-
-    public boolean getBit(int j) {
-        return bitSet.get(j);
     }
 
     private int randomHash(String s, int i) {
@@ -67,7 +55,6 @@ public class BloomFilterRan {
         for (char c : s.toCharArray()) {
             hash += c;
         }
-        // hash function of (ax + b) % p
         return (aValues[i] * hash + bValues[i]) % prime;
     }
 
