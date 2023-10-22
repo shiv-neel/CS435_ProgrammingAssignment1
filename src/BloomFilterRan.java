@@ -2,13 +2,13 @@ import java.util.BitSet;
 import java.util.Random;
 
 public class BloomFilterRan {
-    private BitSet bitSet;
-    private int filterSize;
-    private int dataSize;
-    private int numHashes;
-    private int prime;
-    private int[] aValues;
-    private int[] bValues;
+    private final BitSet bitSet; // bit array
+    private final int filterSize; // size of bloom filter (M)
+    private int dataSize; // number of items added to the set (n)
+    private final int numHashes; // number of hash functions (k)
+    private final int prime; // prime number larger than M
+    private final int[] aValues; // a values for hash functions
+    private final int[] bValues; // b values for hash functions
 
     public BloomFilterRan(int setSize, int bitsPerElement) {
         this.filterSize = setSize * bitsPerElement;
